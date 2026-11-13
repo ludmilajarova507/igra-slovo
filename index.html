@@ -1,0 +1,741 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Игра в слова</title>
+<style>
+:root {
+    --bg: #f3f6fb;
+    --card: #ffffff;
+    --primary: #6558e8;
+    --primary-dark: #5144cf;
+    --text: #20243a;
+    --muted: #858ba3;
+    --green: #18a979;
+    --red: #e45c68;
+    --border: #e9ebf3;
+}
+* {
+    box-sizing: border-box;
+}
+body {
+    margin: 0;
+    min-height: 100vh;
+    padding: 35px 16px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+.container {
+    max-width: 850px;
+    margin: auto;
+}
+.header {
+    text-align: center;
+    margin-bottom: 28px;
+}
+.logo {
+    width: 58px;
+    height: 58px;
+    display: grid;
+    place-items: center;
+    margin: 0 auto 14px;
+    border-radius: 18px;
+    background: #e9e6ff;
+    font-size: 28px;
+}
+h1 {
+    font-size: 32px;
+    margin: 0 0 8px;
+    letter-spacing: -1px;
+}
+.subtitle {
+    color: var(--muted);
+    font-size: 14px;
+}
+.card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 24px;
+    margin-bottom: 18px;
+}
+.scoreboard {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+.score {
+    border: 1px solid var(--border);
+    border-radius: 15px;
+    padding: 18px;
+    text-align: center;
+}
+.score.active {
+    border: 2px solid var(--primary);
+    background: #f8f7ff;
+}
+.score-label {
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 8px;
+}
+.score-number {
+    font-size: 30px;
+    font-weight: 750;
+}
+.turn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 9px;
+    margin: 20px 0;
+    color: var(--primary);
+    font-weight: 650;
+    font-size: 14px;
+}
+.dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--green);
+}
+.last-word {
+    background: #f7f8fc;
+    border-radius: 15px;
+    padding: 20px;
+    text-align: center;
+}
+.last-word small {
+    display: block;
+    color: var(--muted);
+    margin-bottom: 10px;
+}
+.last-word strong {
+    font-size: 29px;
+    letter-spacing: 2px;
+}
+.letter {
+    color: var(--primary);
+}
+.hint {
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 13px;
+}
+.input-area {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+input {
+    flex: 1;
+    min-width: 0;
+    height: 52px;
+    padding: 0 16px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    outline: none;
+    font-size: 16px;
+    color: var(--text);
+    transition: .2s;
+}
+input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px #6558e81a;
+}
+button {
+    border: none;
+    cursor: pointer;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 650;
+    padding: 0 22px;
+    transition: .2s;
+}
+button:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+}
+.primary {
+    background: var(--primary);
+    color: white;
+}
+.primary:hover:not(:disabled) {
+    background: var(--primary-dark);
+}
+.secondary {
+    background: #f0efff;
+    color: var(--primary);
+}
+.danger {
+    background: #fff0f1;
+    color: var(--red);
+}
+.controls {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+.controls button {
+    flex: 1;
+    height: 43px;
+}
+.message {
+    min-height: 42px;
+    padding: 12px;
+    margin-top: 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    text-align: center;
+    color: var(--muted);
+    background: #f7f8fc;
+}
+.message.success {
+    color: #13855e;
+    background: #e9f8f1;
+}
+.message.error {
+    color: #c64d5b;
+    background: #fff0f1;
+}
+.history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 17px;
+}
+.history-header h2 {
+    font-size: 17px;
+    margin: 0;
+}
+.history-count {
+    font-size: 12px;
+    color: var(--muted);
+}
+.history {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    max-height: 280px;
+    overflow-y: auto;
+}
+.history-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    background: #f8f9fc;
+    padding: 12px 14px;
+    border-radius: 11px;
+}
+.word-info {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+}
+.word-number {
+    color: var(--muted);
+    font-size: 12px;
+    width: 22px;
+}
+.word-name {
+    font-weight: 650;
+    text-transform: capitalize;
+}
+.player-tag {
+    font-size: 11px;
+    padding: 5px 9px;
+    border-radius: 20px;
+    background: #eeeaff;
+    color: var(--primary);
+}
+.player-tag.computer {
+    background: #e9f8f1;
+    color: #13855e;
+}
+.empty {
+    text-align: center;
+    color: var(--muted);
+    padding: 25px 0;
+    font-size: 13px;
+}
+.rules {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.8;
+}
+.rules h3 {
+    color: var(--text);
+    margin-top: 0;
+}
+.footer {
+    text-align: center;
+    color: #a0a5b7;
+    font-size: 12px;
+    margin-top: 24px;
+}
+@media(max-width: 550px) {
+    body { padding: 20px 12px; }
+    h1 { font-size: 27px; }
+    .card { padding: 17px; }
+    .input-area { flex-direction: column; }
+    .input-area button { height: 49px; }
+    .controls { flex-direction: column; }
+    .controls button { min-height: 43px; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+    <header class="header">
+        <div class="logo">🔤</div>
+        <h1>Игра в слова</h1>
+        <div class="subtitle">Проверь свою эрудицию и обыграй компьютер!</div>
+    </header>
+
+    <section class="card">
+
+        <div class="scoreboard">
+            <div class="score active" id="playerScoreBox">
+                <div class="score-label">👤 Вы</div>
+                <div class="score-number" id="playerScore">0</div>
+            </div>
+            <div class="score" id="computerScoreBox">
+                <div class="score-label">🤖 Компьютер</div>
+                <div class="score-number" id="computerScore">0</div>
+            </div>
+        </div>
+
+        <div class="turn">
+            <span class="dot"></span>
+            <span id="turnText">Ваш ход!</span>
+        </div>
+
+        <div class="last-word">
+            <small>Последнее названное слово</small>
+            <strong id="lastWord">Начнём?</strong>
+            <div class="hint" id="hint">
+                Введите любое русское слово
+            </div>
+        </div>
+
+        <div class="input-area">
+            <input
+                type="text"
+                id="wordInput"
+                placeholder="Введите слово..."
+                autocomplete="off"
+                maxlength="30"
+            >
+            <button class="primary" id="sendButton" onclick="submitWord()">
+                Отправить
+            </button>
+        </div>
+
+        <div class="message" id="message">
+            Ваша задача — назвать слово по правилам игры.
+        </div>
+
+        <div class="controls">
+            <button class="secondary" onclick="newGame()">
+                ↻ Новая игра
+            </button>
+            <button class="danger" onclick="surrender()">
+                Сдаться
+            </button>
+        </div>
+
+    </section>
+
+    <section class="card">
+        <div class="history-header">
+            <h2>📋 История слов</h2>
+            <span class="history-count" id="historyCount">0 слов</span>
+        </div>
+        <div class="history" id="history">
+            <div class="empty">Здесь появятся использованные слова</div>
+        </div>
+    </section>
+
+    <section class="card rules">
+        <h3>📖 Правила игры</h3>
+        <p>
+            1. Первый игрок называет любое русское слово.
+        </p>
+        <p>
+            2. Следующее слово должно начинаться с последней буквы предыдущего.
+        </p>
+        <p>
+            3. Слова нельзя повторять в течение одной игры.
+        </p>
+        <p>
+            4. Буквы Ь, Ъ и Ы в конце слова не учитываются.
+        </p>
+        <p>
+            5. За каждое правильное слово вы получаете 1 очко.
+        </p>
+        <p>
+            6. Если компьютер не может найти подходящее слово, он проигрывает!
+        </p>
+    </section>
+
+    <div class="footer">
+        Игра в слова · Тренируй память и расширяй словарный запас
+    </div>
+
+</div>
+
+<script>
+const words = [
+"арбуз","автобус","апельсин","аквариум","ананас","аист",
+"бабочка","банан","береза","библиотека","билет","барабан",
+"вагон","вишня","ветер","велосипед","вода","ворона",
+"город","гитара","гора","гриб","груша","газета",
+"дом","дорога","дерево","дождь","дракон","девочка",
+"ежевика","ежик","ель","еда","единорог",
+"жираф","журнал","жемчуг","жук","жасмин",
+"зебра","зима","зеркало","звезда","заяц","земля",
+"игра","игла","интернет","индюк","история",
+"йогурт","йога","йод",
+"карандаш","корабль","книга","кот","картина","кровать",
+"лампа","лошадь","лес","лиса","лимон","луна",
+"машина","море","молоко","медведь","музыка","мяч",
+"носорог","ножницы","небо","ночь","ноутбук","нос",
+"облако","огурец","озеро","обезьяна","океан",
+"птица","помидор","пароход","планета","пальто","пирог",
+"ракета","ромашка","рыба","ручка","река","робот",
+"солнце","собака","самолет","снег","сахар","стол",
+"телефон","тигр","трава","торт","трамвай","тетрадь",
+"улица","утка","улитка","учитель","улыбка",
+"футбол","фонарь","фабрика","фламинго","фрукты",
+"хлеб","хомяк","холодильник","художник","халат",
+"цветок","цирк","цыпленок","церковь",
+"часы","чайник","черепаха","человек","чемодан",
+"школа","шар","шоколад","шапка","шахматы","шуба",
+"щука","щетка","щенок","щавель",
+"экран","экскаватор","эксперт","экзамен",
+"юла","юбка","ювелир","юность",
+"яблоко","ягода","якорь","ягуар","яйцо","ящик",
+"адрес","белка","василек","гвоздика","дельфин",
+"енот","жасмин","зонт","изюм","кактус","ландыш",
+"малина","нарцисс","орел","пингвин","рябина",
+"сирень","тюльпан","филин","хорек","черника",
+"шмель","эскимо","южанин","ящерица"
+];
+
+const ignored = ["ь", "ъ", "ы"];
+
+let usedWords = new Set();
+let history = [];
+let playerScore = 0;
+let computerScore = 0;
+let gameOver = false;
+let isComputerTurn = false;
+let lastWord = "";
+let currentLetter = "";
+let computerTimer = null;
+
+const input = document.getElementById("wordInput");
+const sendButton = document.getElementById("sendButton");
+
+function normalize(word) {
+    return word.toLowerCase().trim().replace(/ё/g, "е");
+}
+
+function getLastLetter(word) {
+    let letters = Array.from(normalize(word));
+    let letter = letters[letters.length - 1];
+
+    while (ignored.includes(letter) && letters.length > 1) {
+        letters.pop();
+        letter = letters[letters.length - 1];
+    }
+
+    return letter;
+}
+
+function showMessage(text, type = "") {
+    const message = document.getElementById("message");
+    message.textContent = text;
+    message.className = "message " + type;
+}
+
+function updateInterface() {
+    document.getElementById("playerScore").textContent = playerScore;
+    document.getElementById("computerScore").textContent = computerScore;
+
+    document.getElementById("playerScoreBox")
+        .classList.toggle("active", !isComputerTurn && !gameOver);
+
+    document.getElementById("computerScoreBox")
+        .classList.toggle("active", isComputerTurn && !gameOver);
+
+    document.getElementById("turnText").textContent =
+        gameOver ? "Игра завершена" :
+        isComputerTurn ? "Ход компьютера..." : "Ваш ход!";
+
+    document.getElementById("lastWord").textContent =
+        lastWord || "Начнём?";
+
+    document.getElementById("hint").innerHTML =
+        currentLetter
+        ? "Следующее слово должно начинаться на букву <b class='letter'>" +
+          currentLetter.toUpperCase() + "</b>"
+        : "Введите любое русское слово";
+
+    input.disabled = gameOver || isComputerTurn;
+    sendButton.disabled = gameOver || isComputerTurn;
+
+    if (gameOver) {
+        input.placeholder = "Игра завершена";
+    } else if (isComputerTurn) {
+        input.placeholder = "Ход компьютера...";
+    } else {
+        input.placeholder = "Введите слово...";
+    }
+}
+
+function renderHistory() {
+    const container = document.getElementById("history");
+
+    document.getElementById("historyCount").textContent =
+        history.length + " слов";
+
+    if (history.length === 0) {
+        container.innerHTML =
+            '<div class="empty">Здесь появятся использованные слова</div>';
+        return;
+    }
+
+    container.innerHTML = "";
+
+    history.slice().reverse().forEach((item, index) => {
+        const row = document.createElement("div");
+        row.className = "history-item";
+
+        const info = document.createElement("div");
+        info.className = "word-info";
+
+        const number = document.createElement("span");
+        number.className = "word-number";
+        number.textContent = history.length - index + ".";
+
+        const name = document.createElement("span");
+        name.className = "word-name";
+        name.textContent = item.word;
+
+        const tag = document.createElement("span");
+        tag.className = "player-tag" +
+            (item.owner === "computer" ? " computer" : "");
+
+        tag.textContent =
+            item.owner === "computer" ? "Компьютер" : "Вы";
+
+        info.append(number, name);
+        row.append(info, tag);
+        container.appendChild(row);
+    });
+}
+
+function addWord(word, owner) {
+    const normalized = normalize(word);
+
+    usedWords.add(normalized);
+
+    history.push({
+        word: word,
+        owner: owner
+    });
+
+    lastWord = word;
+    currentLetter = getLastLetter(word);
+
+    if (owner === "player") {
+        playerScore++;
+    } else {
+        computerScore++;
+    }
+
+    renderHistory();
+    updateInterface();
+}
+
+function findComputerWord() {
+    const candidates = words.filter(word => {
+        const normalized = normalize(word);
+
+        return normalized.startsWith(currentLetter) &&
+            !usedWords.has(normalized) &&
+            !ignored.includes(getLastLetter(normalized));
+    });
+
+    if (candidates.length === 0) {
+        return null;
+    }
+
+    candidates.sort((a, b) => {
+        const aCount = words.filter(w =>
+            normalize(w).startsWith(getLastLetter(a)) &&
+            !usedWords.has(normalize(w))
+        ).length;
+
+        const bCount = words.filter(w =>
+            normalize(w).startsWith(getLastLetter(b)) &&
+            !usedWords.has(normalize(w))
+        ).length;
+
+        return aCount - bCount;
+    });
+
+    return candidates[0];
+}
+
+function computerMove() {
+    if (gameOver) return;
+
+    const word = findComputerWord();
+
+    if (!word) {
+        finishGame("Вы победили! Компьютер не смог подобрать слово.");
+        return;
+    }
+
+    addWord(word, "computer");
+    isComputerTurn = false;
+
+    updateInterface();
+
+    showMessage("Компьютер назвал слово: " + word, "success");
+
+    input.focus();
+}
+
+function submitWord() {
+    if (gameOver || isComputerTurn) return;
+
+    const original = input.value.trim();
+    const word = normalize(original);
+
+    if (!word) {
+        showMessage("Введите слово!", "error");
+        return;
+    }
+
+    if (!/^[а-яё]+$/i.test(original)) {
+        showMessage("Используйте только русские буквы.", "error");
+        return;
+    }
+
+    if (word.length < 2) {
+        showMessage("Слово должно содержать минимум 2 буквы.", "error");
+        return;
+    }
+
+    if (usedWords.has(word)) {
+        showMessage("Это слово уже использовалось!", "error");
+        input.select();
+        return;
+    }
+
+    if (currentLetter && !word.startsWith(currentLetter)) {
+        showMessage(
+            "Слово должно начинаться на букву «" +
+            currentLetter.toUpperCase() + "»!",
+            "error"
+        );
+        input.select();
+        return;
+    }
+
+    if (ignored.includes(getLastLetter(word))) {
+        showMessage(
+            "Слово должно заканчиваться на букву, с которой можно продолжить игру.",
+            "error"
+        );
+        return;
+    }
+
+    addWord(original.toLowerCase(), "player");
+
+    input.value = "";
+
+    isComputerTurn = true;
+    updateInterface();
+
+    showMessage("Отлично! Компьютер думает...", "success");
+
+    computerTimer = setTimeout(computerMove, 850);
+}
+
+function finishGame(message) {
+    gameOver = true;
+    isComputerTurn = false;
+
+    if (computerTimer) {
+        clearTimeout(computerTimer);
+        computerTimer = null;
+    }
+
+    updateInterface();
+
+    const result =
+        playerScore > computerScore ? "Вы выиграли!" :
+        playerScore < computerScore ? "Победил компьютер!" :
+        "Ничья!";
+
+    showMessage(
+        message + " " + result +
+        " Итоговый счёт: " +
+        playerScore + " : " + computerScore,
+        "success"
+    );
+}
+
+function surrender() {
+    if (gameOver) return;
+
+    finishGame("Вы сдались.");
+}
+
+function newGame() {
+    if (computerTimer) {
+        clearTimeout(computerTimer);
+        computerTimer = null;
+    }
+
+    usedWords = new Set();
+    history = [];
+    playerScore = 0;
+    computerScore = 0;
+    gameOver = false;
+    isComputerTurn = false;
+    lastWord = "";
+    currentLetter = "";
+
+    input.value = "";
+
+    renderHistory();
+    updateInterface();
+
+    showMessage("Новая игра началась! Назовите первое слово.");
+
+    input.focus();
+}
+
+input.addEventListener("keydown", function(event) {
+    if (event.key === "Enter") {
+        submitWord();
+    }
+});
+
+newGame();
+</script>
+
+</body>
+</html>
